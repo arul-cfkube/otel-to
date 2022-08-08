@@ -22,23 +22,28 @@ spec:
       app: paymentservice
   template:
     metadata:
+      annotations:
+        instrumentation.opentelemetry.io/inject-java: "default/my-instrumentation"
       labels:
         app: paymentservice
+        demo: chaos
     spec:
       serviceAccountName: default
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: paymentservice
+        image: dev.registry.pivotal.io/se-americas-west/micro-services-otel/paymentservice
         ports:
         - containerPort: 50051
         env:
         - name: PORT
           value: "50051"
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "http://wavefront-proxy.wavefront:4317"
         - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
-          value: "http://otelcollector:4317"
+          value: "http://wavefront-proxy.wavefront:4317"
         - name: OTEL_RESOURCE_ATTRIBUTES
-          value: "service.name=paymentservice,service.version=1.0.0"
+          value: "application=otel-demo-shopping-ms,service.name=otel-paymentservice,service.version=1.0.0"
         readinessProbe:
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:50051"]
@@ -52,6 +57,8 @@ spec:
           limits:
             cpu: 200m
             memory: 128Mi
+      imagePullSecrets:
+      - name: reg-creds
 ---
 apiVersion: v1
 kind: Service

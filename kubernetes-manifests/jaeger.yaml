@@ -8,8 +8,11 @@ spec:
       app: jaeger
   template:
     metadata:
+      annotations:
+        instrumentation.opentelemetry.io/inject-java: "default/my-instrumentation"
       labels:
         app: jaeger
+        demo: chaos
     spec:
       serviceAccountName: default
       terminationGracePeriodSeconds: 5
@@ -19,6 +22,12 @@ spec:
         env:
         - name: COLLECTOR_ZIPKIN_HOST_PORT
           value: ":9411"
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "http://wavefront-proxy.wavefront:4317"
+        - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+          value: "http://wavefront-proxy.wavefront:4317"
+        - name: OTEL_RESOURCE_ATTRIBUTES
+          value: "application=otel-demo-shopping-ms,service.name=otel-jaeger,service.version=1.0.0"
         ports:
         - containerPort: 5775
         - containerPort: 6831
@@ -79,7 +88,7 @@ kind: Service
 metadata:
   name: jaeger-frontend
 spec:
-  type: NodePort
+  type: LoadBalancer
   selector:
     app: jaeger
   ports:

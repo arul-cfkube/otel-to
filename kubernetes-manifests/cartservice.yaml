@@ -22,23 +22,28 @@ spec:
       app: cartservice
   template:
     metadata:
+      annotations:
+        instrumentation.opentelemetry.io/inject-java: "default/my-instrumentation"
       labels:
         app: cartservice
+        demo: chaos
     spec:
       serviceAccountName: default
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: cartservice
+        image: dev.registry.pivotal.io/se-americas-west/micro-services-otel/cartservice
         ports:
         - containerPort: 7070
         env:
         - name: REDIS_ADDR
           value: "redis-cart:6379"
         - name: OTEL_EXPORTER_OTLP_ENDPOINT
-          value: "http://otelcollector:4317"
+          value: "http://wavefront-proxy.wavefront:4317"
+        - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+          value: "http://wavefront-proxy.wavefront:4317"
         - name: OTEL_RESOURCE_ATTRIBUTES
-          value: "service.name=cartservice,service.version=1.0.0"
+          value: "application=otel-demo-shopping-ms,service.name=otel-cartservice,service.version=1.0.0"
         resources:
           requests:
             cpu: 200m
@@ -55,6 +60,9 @@ spec:
           periodSeconds: 10
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:7070", "-rpc-timeout=5s"]
+      imagePullSecrets:
+      - name: reg-creds
+
 ---
 apiVersion: v1
 kind: Service

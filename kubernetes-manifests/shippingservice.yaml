@@ -22,22 +22,27 @@ spec:
       app: shippingservice
   template:
     metadata:
+      annotations:
+        instrumentation.opentelemetry.io/inject-java: "default/my-instrumentation"
       labels:
         app: shippingservice
+        demo: chaos
     spec:
       serviceAccountName: default
       containers:
       - name: server
-        image: shippingservice
+        image: dev.registry.pivotal.io/se-americas-west/micro-services-otel/shippingservice
         ports:
         - containerPort: 50051
         env:
         - name: PORT
           value: "50051"
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "http://wavefront-proxy.wavefront:4317"
         - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
-          value: "http://otelcollector:4317"
+          value: "http://wavefront-proxy.wavefront:4317"
         - name: OTEL_RESOURCE_ATTRIBUTES
-          value: "service.name=shippingservice,service.version=1.0.0"
+          value: "application=otel-demo-shopping-ms,service.name=otel-shippingservice,service.version=1.0.0"
         readinessProbe:
           periodSeconds: 5
           exec:
@@ -52,6 +57,8 @@ spec:
           limits:
             cpu: 200m
             memory: 128Mi
+      imagePullSecrets:
+      - name: reg-creds
 ---
 apiVersion: v1
 kind: Service

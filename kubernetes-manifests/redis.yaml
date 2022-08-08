@@ -22,8 +22,18 @@ spec:
       app: redis-cart
   template:
     metadata:
+      annotations:
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "9090"
+        prometheus.io/scheme: "http"
+        prometheus.io/scrape: "true"
+        wavefront.com/path: "metrics"
+        wavefront.com/port: "9090"
+        wavefront.com/scheme: "http"
+        wavefront.com/scrape: "true"
       labels:
         app: redis-cart
+        demo: chaos
     spec:
       containers:
       - name: redis
@@ -51,6 +61,7 @@ spec:
       volumes:
       - name: redis-data
         emptyDir: {}
+      
 ---
 apiVersion: v1
 kind: Service

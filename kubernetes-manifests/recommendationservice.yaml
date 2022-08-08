@@ -22,14 +22,17 @@ spec:
       app: recommendationservice
   template:
     metadata:
+      annotations:
+        instrumentation.opentelemetry.io/inject-java: "default/my-instrumentation"
       labels:
         app: recommendationservice
+        demo: chaos
     spec:
       serviceAccountName: default
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: recommendationservice
+        image: dev.registry.pivotal.io/se-americas-west/micro-services-otel/recommendationservice
         ports:
         - containerPort: 8080
         readinessProbe:
@@ -45,10 +48,12 @@ spec:
           value: "8080"
         - name: PRODUCT_CATALOG_SERVICE_ADDR
           value: "productcatalogservice:3550"
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "http://wavefront-proxy.wavefront:4317"
         - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
-          value: "http://otelcollector:4317"
+          value: "http://wavefront-proxy.wavefront:4317"
         - name: OTEL_RESOURCE_ATTRIBUTES
-          value: "service.name=recommendationservice,service.version=1.0.0"
+          value: "application=otel-demo-shopping-ms,service.name=otel-recommendationservice,service.version=1.0.0"
         resources:
           requests:
             cpu: 100m
@@ -56,6 +61,8 @@ spec:
           limits:
             cpu: 200m
             memory: 450Mi
+      imagePullSecrets:
+      - name: reg-creds
 ---
 apiVersion: v1
 kind: Service

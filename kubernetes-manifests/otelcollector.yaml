@@ -8,14 +8,28 @@ spec:
       app: otelcollector
   template:
     metadata:
+      annotations:
+        instrumentation.opentelemetry.io/inject-java: "default/my-instrumentation"
+        wavefront.com/port: "55680"
+        wavefront.com/scheme: "http"
+        wavefront.com/scrape: "true"
       labels:
         app: otelcollector
+        demo: chaos
     spec:
       serviceAccountName: default
       terminationGracePeriodSeconds: 5
       containers:
       - name: otelcollector
-        image: otelcollector
+        image: otel/opentelemetry-collector
+        env:
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "http://wavefront-proxy.wavefront:4317"
+        - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+          value: "http://wavefront-proxy.wavefront:4317"
+        - name: OTEL_RESOURCE_ATTRIBUTES
+          value: "application=otel-demo-shopping-ms,service.name=otel-otelcollector,service.version=1.0.0"
+
         ports:
         - containerPort: 1888
         - containerPort: 8888
@@ -23,6 +37,8 @@ spec:
         - containerPort: 13133
         - containerPort: 4317
         - containerPort: 55670
+        - containerPort: 55680
+        - containerPort: 9411
         resources:
           requests:
             cpu: 200m
@@ -30,6 +46,7 @@ spec:
           limits:
             cpu: 300m
             memory: 300Mi
+
 ---
 apiVersion: v1
 kind: Service
@@ -58,3 +75,9 @@ spec:
   - name: "55670"
     port: 55670
     targetPort: 55670
+  - name: "55680"
+    port: 55680
+    targetPort: 55680
+  - name: "9411"
+    port: 9411
+    targetPort: 9411

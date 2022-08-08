@@ -22,13 +22,16 @@ spec:
       app: checkoutservice
   template:
     metadata:
+      annotations:
+        instrumentation.opentelemetry.io/inject-java: "default/my-instrumentation"
       labels:
         app: checkoutservice
+        demo: chaos
     spec:
       serviceAccountName: default
       containers:
         - name: server
-          image: checkoutservice
+          image: dev.registry.pivotal.io/se-americas-west/micro-services-otel/checkoutservice
           ports:
           - containerPort: 5050
           readinessProbe:
@@ -52,10 +55,12 @@ spec:
             value: "currencyservice:7000"
           - name: CART_SERVICE_ADDR
             value: "cartservice:7070"
+          - name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: "http://wavefront-proxy.wavefront:4317"
           - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
-            value: "http://otelcollector:4317"
+            value: "http://wavefront-proxy.wavefront:4317"
           - name: OTEL_RESOURCE_ATTRIBUTES
-            value: "service.name=checkoutservice,service.version=1.0.0"
+            value: "application=otel-demo-shopping-ms,service.name=otel-checkoutservice,service.version=1.0.0"
           resources:
             requests:
               cpu: 100m
@@ -63,6 +68,8 @@ spec:
             limits:
               cpu: 200m
               memory: 128Mi
+      imagePullSecrets:
+      - name: reg-creds
 ---
 apiVersion: v1
 kind: Service

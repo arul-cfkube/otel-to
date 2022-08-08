@@ -26,6 +26,7 @@ spec:
         app: loadgenerator
       annotations:
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
+        instrumentation.opentelemetry.io/inject-java: "default/my-instrumentation"
     spec:
       serviceAccountName: default
       terminationGracePeriodSeconds: 5
@@ -46,12 +47,25 @@ spec:
         env:
         - name: FRONTEND_ADDR
           value: "frontend:80"
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "http://wavefront-proxy.wavefront:4317"
+        - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+          value: "http://wavefront-proxy.wavefront:4317"
+        - name: OTEL_RESOURCE_ATTRIBUTES
+          value: "service.name=loadgenerator,service.version=1.0.0"
       containers:
       - name: main
-        image: loadgenerator
+        image: dev.registry.pivotal.io/se-americas-west/micro-services-otel/loadgenerator@sha256:af700c6b124da671f0c726c1098bcf9ef8c229d04883e6faaae5ae42ba76167a
+        imagePullPolicy: Always
         env:
         - name: FRONTEND_ADDR
           value: "frontend:80"
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "http://wavefront-proxy.wavefront:4317"
+        - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+          value: "http://wavefront-proxy.wavefront:4317"
+        - name: OTEL_RESOURCE_ATTRIBUTES
+          value: "application=otel-demo-shopping-ms,service.name=otel-loadgenerator-c,service.version=1.0.0"
         - name: USERS
           value: "10"
         resources:
@@ -61,3 +75,25 @@ spec:
           limits:
             cpu: 500m
             memory: 512Mi
+      imagePullSecrets:
+      - name: reg-creds
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: loadgenerator
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-internal: 0.0.0.0/0
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-interval: "5"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-timeout: "3"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-unhealthy-threshold: "2"
+    external-dns.alpha.kubernetes.io/hostname: demo-load.${DOMAIN}
+spec:
+  type: LoadBalancer
+  selector:
+    app: loadgenerator
+  ports:
+  - name: http
+    port: 8089
+    targetPort: 8089

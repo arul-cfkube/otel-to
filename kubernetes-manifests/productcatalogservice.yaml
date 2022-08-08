@@ -22,23 +22,28 @@ spec:
       app: productcatalogservice
   template:
     metadata:
+      annotations:
+        instrumentation.opentelemetry.io/inject-java: "default/my-instrumentation"
       labels:
         app: productcatalogservice
+        demo: chaos
     spec:
       serviceAccountName: default
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: productcatalogservice
+        image: dev.registry.pivotal.io/se-americas-west/micro-services-otel/productcatalogservice
         ports:
         - containerPort: 3550
         env:
         - name: PORT
           value: "3550"
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "http://wavefront-proxy.wavefront:4317"
         - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
-          value: "http://otelcollector:4317"
+          value: "http://wavefront-proxy.wavefront:4317"
         - name: OTEL_RESOURCE_ATTRIBUTES
-          value: "service.name=productcatalogservice,service.version=1.0.0"
+          value: "application=otel-demo-shopping-ms,service.name=otel-productcatalogservice,service.version=1.0.0"
         readinessProbe:
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:3550"]
@@ -52,6 +57,8 @@ spec:
           limits:
             cpu: 200m
             memory: 128Mi
+      imagePullSecrets:
+      - name: reg-creds
 ---
 apiVersion: v1
 kind: Service
