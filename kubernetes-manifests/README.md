@@ -1,8 +1,14 @@
 # ./kubernetes-manifests
 
-:warning: Kubernetes manifests provided in this directory are not directly
-deployable to a cluster. They are meant to be used with `skaffold` command to
-insert the correct `image:` tags.
+# Run to deploy
+kubectl apply -f kubenetes-manifests
 
-Use the manifests in [/release](/release) directory which are configured with
-pre-built public images.
+#wavefront proxys + add otel proxy ports
+helm install wavefront wavefront/wavefront \
+    --set wavefront.url=https://XXXXX.wavefront.com \
+    --set wavefront.token=XXXXXXXXXXXXXXXXXXXX \
+    --set proxy.args="--otlpGrpcListenerPorts 4317 --otlpHttpListenerPorts 4318 --traceZipkinListenerPorts 9411" \
+    --set clusterName="XXXXX-demo-otel" --namespace wavefront --create-namespace
+
+#path the proxy
+kubectl -n wavefront patch svc wavefront-proxy --patch '{"spec": {"ports": [{"name":"oltphttp", "port": 4318, "protocol": "TCP"}, {"name":"oltpgrpc", "port": 4317, "protocol": "TCP"}]}}'
