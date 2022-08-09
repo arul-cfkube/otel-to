@@ -31,7 +31,7 @@ spec:
       serviceAccountName: default
       containers:
       - name: server
-        image: dev.registry.pivotal.io/se-americas-west/micro-services-otel/shippingservice
+        image: arulvkhanna/shippingservice
         ports:
         - containerPort: 50051
         env:
@@ -57,8 +57,8 @@ spec:
           limits:
             cpu: 200m
             memory: 128Mi
-      imagePullSecrets:
-      - name: reg-creds
+
+
 ---
 apiVersion: v1
 kind: Service

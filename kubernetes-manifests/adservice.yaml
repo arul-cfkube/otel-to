@@ -38,7 +38,7 @@ spec:
         image : arulvkhanna/stress-image
         command: ["/bin/sh", "-ec", "while :; do echo 'STARTING STRESS TEST'; stress --cpu 1 --io 2  --vm 2 --vm-bytes  580M --timeout 10s -v ; sleep 10s; echo 'STOPPING TEST !!!!';   done"]
       - name: server
-        image: dev.registry.pivotal.io/se-americas-west/micro-services-otel/adservice:v0.1.4-184-g6b091ff@sha256:23609184403b4fb361a043d138cbd5c79edf3d2f47e4a0d677509032ff0a9529
+        image: arulvkhanna/adservice
         ports:
         - containerPort: 9555
         env:
@@ -67,8 +67,8 @@ spec:
           periodSeconds: 15
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:9555"]
-      imagePullSecrets:
-      - name: reg-creds
+
+
 ---
 apiVersion: v1
 kind: Service

@@ -55,8 +55,7 @@ spec:
           value: "service.name=loadgenerator,service.version=1.0.0"
       containers:
       - name: main
-        image: dev.registry.pivotal.io/se-americas-west/micro-services-otel/loadgenerator@sha256:af700c6b124da671f0c726c1098bcf9ef8c229d04883e6faaae5ae42ba76167a
-        imagePullPolicy: Always
+        image: arulvkhanna/loadgenerator
         env:
         - name: FRONTEND_ADDR
           value: "frontend:80"
@@ -75,8 +74,8 @@ spec:
           limits:
             cpu: 500m
             memory: 512Mi
-      imagePullSecrets:
-      - name: reg-creds
+
+
 
 ---
 apiVersion: v1

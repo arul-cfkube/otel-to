@@ -32,7 +32,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: dev.registry.pivotal.io/se-americas-west/micro-services-otel/recommendationservice
+        image: arulvkhanna/recommendationservice
         ports:
         - containerPort: 8080
         readinessProbe:

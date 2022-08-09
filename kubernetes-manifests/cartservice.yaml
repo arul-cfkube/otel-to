@@ -32,7 +32,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: dev.registry.pivotal.io/se-americas-west/micro-services-otel/cartservice
+        image: arulvkhanna/cartservice
         ports:
         - containerPort: 7070
         env:
@@ -60,8 +60,8 @@ spec:
           periodSeconds: 10
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:7070", "-rpc-timeout=5s"]
-      imagePullSecrets:
-      - name: reg-creds
+
+
 
 ---
 apiVersion: v1

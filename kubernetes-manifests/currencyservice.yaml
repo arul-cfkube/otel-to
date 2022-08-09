@@ -32,7 +32,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: dev.registry.pivotal.io/se-americas-west/micro-services-otel/currencyservice
+        image: arulvkhanna/currencyservice
         ports:
         - name: grpc
           containerPort: 7000
@@ -58,8 +58,8 @@ spec:
           limits:
             cpu: 200m
             memory: 128Mi
-      imagePullSecrets:
-      - name: reg-creds
+
+
 ---
 apiVersion: v1
 kind: Service

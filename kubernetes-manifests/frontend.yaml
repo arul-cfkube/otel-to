@@ -35,7 +35,7 @@ spec:
           image : arulvkhanna/stress-image
           command: ["/bin/sh", "-ec", "while :; do echo 'STARTING STRESS TEST'; stress --cpu 1 --io 2  --vm 2 --vm-bytes  120M --timeout 10s -v ; sleep 10s; echo 'STOPPING TEST !!!!';   done"]
         - name: server
-          image: dev.registry.pivotal.io/se-americas-west/micro-services-otel/frontend:v0.1.4-184-g6b091ff@sha256:b73939a62fbf7643d832357691f8d870e6eb910be38a45571f82f6e54f57e2ba
+          image: arulvkhanna/frontend:v0.1.4-184-g6b091ff@sha256:b73939a62fbf7643d832357691f8d870e6eb910be38a45571f82f6e54f57e2ba
           ports:
           - containerPort: 8080
           readinessProbe:
@@ -90,8 +90,8 @@ spec:
             limits:
               cpu: 200m
               memory: 128Mi
-      imagePullSecrets:
-      - name: reg-creds
+
+
 ---
 apiVersion: v1
 kind: Service
